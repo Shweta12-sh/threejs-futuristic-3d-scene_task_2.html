@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#080810" />
+<title>CYBORG // TECHFEST IIT BOMBAY — Evolve Beyond Human Limits</title>
+<meta name="description" content="CYBORG at Techfest, IIT Bombay — Asia's largest science &amp; technology festival. Neural interfaces, bionic exoskeletons, cybernetic vision and quantum cores. Evolve beyond human limits." />
+
+<!-- ===== FONTS ===== -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+
+<!-- ===== TAILWIND ===== -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          void:  '#080810',
+          panel: '#0a0b10',
+          neon:  '#00f3ff',
+          hot:   '#ff0055',
+          steel: '#e2e8f0',
+          ash:   '#8b93a7'
+        },
+        fontFamily: {
+          display: ['Orbitron', 'ui-sans-serif', 'system-ui'],
+          body:    ['Rajdhani', 'ui-sans-serif', 'system-ui'],
+          syne:    ['Syne', 'ui-sans-serif', 'system-ui']
+        }
+      }
+    }
+  };
+</script>
+
+<style>
+/* ============================================================
+   ROOT TOKENS
+============================================================ */
+:root{
+  --neon:#00f3ff;
+  --hot:#ff0055;
+  --void:#080810;
+  --glass:rgba(10,11,16,.55);
+  --edge:rgba(0,243,255,.20);
+}
+*{ -webkit-tap-highlight-color: transparent; }
+html,body{ max-width:100%; overflow-x:hidden; }
+body{
+  background:var(--void);
+  color:#e2e8f0;
+  font-family:'Rajdhani',sans-serif;
+  letter-spacing:.02em;
+}
+::selection{ background:var(--neon); color:#04040a; }
+
+/* Scrollbar */
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-track{ background:#06060c; }
+::-webkit-scrollbar-thumb{
+  background:linear-gradient(180deg,var(--neon),#0077aa);
+  border-radius:99px; border:2px solid #06060c;
+}
+::-webkit-scrollbar-thumb:hover{ background:linear-gradient(180deg,var(--hot),#77002a); }
+
+/* ============================================================
+   BACKDROP : GRID + MESH + SCANLINES + VIGNETTE
+============================================================ */
+.fx-layer{ position:fixed; inset:0; pointer-events:none; z-index:0; }
+
+.fx-grid{
+  background-image:
+    linear-gradient(rgba(0,243,255,.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,243,255,.055) 1px, transparent 1px);
+  background-size:48px 48px;
+  -webkit-mask-image:radial-gradient(ellipse 90% 70% at 50% 30%, #000 20%, transparent 78%);
+          mask-image:radial-gradient(ellipse 90% 70% at 50% 30%, #000 20%, transparent 78%);
+  animation:gridDrift 24s linear infinite;
+}
+@keyframes gridDrift{ from{background-position:0 0,0 0;} to{background-position:48px 48px,48px 48px;} }
+
+.fx-scan{
+  background:repeating-linear-gradient(180deg, rgba(255,255,255,.035) 0 1px, transparent 1px 3px);
+  opacity:.55; mix-blend-mode:overlay;
+}
+.fx-sweep::after{
+  content:''; position:absolute; left:0; right:0; height:180px;
+  background:linear-gradient(180deg, transparent, rgba(0,243,255,.06), transparent);
+  animation:sweep 7.5s linear infinite;
+}
+@keyframes sweep{ 0%{transform:translateY(-200px);} 100%{transform:translateY(105vh);} }
+
+.fx-vignette{ box-shadow:inset 0 0 220px 60px rgba(0,0,0,.9); }
+
+.blob{ position:absolute; border-radius:50%; filter:blur(90px); opacity:.34; }
+.blob-a{ width:52vw; height:52vw; max-width:640px; max-height:640px; top:-12%; left:-10%;
+  background:radial-gradient(circle,#00f3ff 0%, transparent 68%); animation:float1 17s ease-in-out infinite; }
+.blob-b{ width:46vw; height:46vw; max-width:560px; max-height:560px; bottom:-14%; right:-8%;
+  background:radial-gradient(circle,#ff0055 0%, transparent 68%); animation:float2 21s ease-in-out infinite; }
+.blob-c{ width:40vw; height:40vw; max-width:480px; max-height:480px; top:38%; left:52%;
+  background:radial-gradient(circle,#7a00ff 0%, transparent 70%); opacity:.22; animation:float1 26s ease-in-out infinite reverse; }
+@keyframes float1{ 0%,100%{transform:translate3d(0,0,0) scale(1);} 50%{transform:translate3d(4vw,5vh,0) scale(1.12);} }
+@keyframes float2{ 0%,100%{transform:translate3d(0,0,0) scale(1.05);} 50%{transform:translate3d(-5vw,-4vh,0) scale(.92);} }
+
+/* Mouse-follow glow (fine pointers only) */
+#cursorGlow{
+  position:fixed; top:0; left:0; width:420px; height:420px; margin:-210px 0 0 -210px;
+  background:radial-gradient(circle, rgba(0,243,255,.10) 0%, rgba(0,243,255,0) 62%);
+  pointer-events:none; z-index:1; opacity:0; transition:opacity .4s ease; will-change:transform;
+}
+@media (pointer:fine){ #cursorGlow{ opacity:1; } }
+
+/* ============================================================
+   HUD CORNERS / FRAMES
+============================================================ */
+.hud{ position:relative; }
+.hud::before{
+  content:''; position:absolute; inset:0; pointer-events:none; z-index:2;
+  background:
+    linear-gradient(var(--neon),var(--neon)) top left/18px 2px no-repeat,
+    linear-gradient(var(--neon),var(--neon)) top left/2px 18px no-repeat,
+    linear-gradient(var(--neon),var(--neon)) top right/18px 2px no-repeat,
+    linear-gradient(var(--neon),var(--neon)) top right/2px 18px no-repeat,
+    linear-gradient(var(--neon),var(--neon)) bottom left/18px 2px no-repeat,
+    linear-gradient(var(--neon),var(--neon)) bottom left/2px 18px no-repeat,
+    linear-gradient(var(--neon),var(--neon)) bottom right/18px 2px no-repeat,
+    linear-gradient(var(--neon),var(--neon)) bottom right/2px 18px no-repeat;
+  opacity:.75; transition:opacity .3s ease, filter .3s ease;
+}
+.hud:hover::before{ opacity:1; filter:drop-shadow(0 0 6px var(--neon)); }
+.hud-hot::before{
+  background:
+    linear-gradient(var(--hot),var(--hot)) top left/18px 2px no-repeat,
+    linear-gradient(var(--hot),var(--hot)) top left/2px 18px no-repeat,
+    linear-gradient(var(--hot),var(--hot)) top right/18px 2px no-repeat,
+    linear-gradient(var(--hot),var(--hot)) top right/2px 18px no-repeat,
+    linear-gradient(var(--hot),var(--hot)) bottom left/18px 2px no-repeat,
+    linear-gradient(var(--hot),var(--hot)) bottom left/2px 18px no-repeat,
+    linear-gradient(var(--hot),var(--hot)) bottom right/18px 2px no-repeat,
+    linear-gradient(var(--hot),var(--hot)) bottom right/2px 18px no-repeat;
+}
+
+.glass{
+  background:linear-gradient(150deg, rgba(0,243,255,.055), rgba(10,11,16,.72) 45%, rgba(255,0,85,.05));
+  backdrop-filter:blur(14px) saturate(140%);
+  -webkit-backdrop-filter:blur(14px) saturate(140%);
+  border:1px solid var(--edge);
+}
+
+/* ============================================================
+   CARDS
+============================================================ */
+.cyber-card{
+  position:relative; overflow:hidden; isolation:isolate;
+  transition:transform .45s cubic-bezier(.16,1,.3,1), border-color .35s ease, box-shadow .45s ease;
+}
+.cyber-card::after{
+  content:''; position:absolute; inset:0; z-index:-1; opacity:0;
+  background:linear-gradient(120deg, transparent 30%, rgba(0,243,255,.16) 50%, transparent 70%);
+  transform:translateX(-120%); transition:opacity .3s ease;
+}
+.cyber-card:hover{
+  transform:translateY(-9px);
+  border-color:rgba(0,243,255,.6);
+  box-shadow:0 22px 60px -20px rgba(0,243,255,.42), 0 0 0 1px rgba(0,243,255,.16) inset;
+}
+.cyber-card:hover::after{ opacity:1; animation:shine 1.1s ease forwards; }
+@keyframes shine{ to{ transform:translateX(120%); } }
+
+/* ============================================================
+   BUTTONS (angled clip-path)
+============================================================ */
+.btn-clip{
+  clip-path:polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+}
+.btn-primary{
+  background:linear-gradient(100deg,#00f3ff,#00b8d4 55%,#00f3ff);
+  color:#04040a; font-weight:700;
+  filter:drop-shadow(0 0 12px rgba(0,243,255,.35));
+  transition:filter .3s ease, transform .25s ease, letter-spacing .3s ease;
+}
+.btn-primary:hover{ filter:drop-shadow(0 0 26px rgba(0,243,255,.85)); transform:translateY(-2px); letter-spacing:.16em; }
+.btn-primary:active{ transform:translateY(0) scale(.985); }
+
+.btn-ghost{
+  background:rgba(0,243,255,.05); color:#00f3ff;
+  box-shadow:inset 0 0 0 1px rgba(0,243,255,.45);
+  transition:background .3s ease, color .3s ease, filter .3s ease, transform .25s ease, letter-spacing .3s ease;
+}
+.btn-ghost:hover{
+  background:rgba(0,243,255,.14); color:#dffdff; transform:translateY(-2px); letter-spacing:.16em;
+  filter:drop-shadow(0 0 18px rgba(0,243,255,.5));
+}
+.btn-hot{
+  background:linear-gradient(100deg,#ff0055,#c2003f);
+  color:#fff; font-weight:700; filter:drop-shadow(0 0 12px rgba(255,0,85,.35));
+  transition:filter .3s ease, transform .25s ease;
+}
+.btn-hot:hover{ filter:drop-shadow(0 0 26px rgba(255,0,85,.8)); transform:translateY(-2px); }
+
+/* ============================================================
+   NAV LINK UNDERLINE
+============================================================ */
+.nav-link{ position:relative; }
+.nav-link::after{
+  content:''; position:absolute; left:0; bottom:-6px; height:2px; width:100%;
+  background:linear-gradient(90deg,var(--neon),var(--hot));
+  transform:scaleX(0); transform-origin:right; transition:transform .35s cubic-bezier(.16,1,.3,1);
+  box-shadow:0 0 10px var(--neon);
+}
+.nav-link:hover::after, .nav-link.active::after{ transform:scaleX(1); transform-origin:left; }
+.nav-link.active{ color:#00f3ff; }
+
+/* ============================================================
+   TEXT FX
+============================================================ */
+.text-glow{ text-shadow:0 0 12px rgba(0,243,255,.55), 0 0 40px rgba(0,243,255,.22); }
+.text-glow-hot{ text-shadow:0 0 12px rgba(255,0,85,.6), 0 0 40px rgba(255,0,85,.25); }
+.grad-text{
+  background:linear-gradient(96deg,#00f3ff 0%,#a5f3ff 30%,#ff0055 78%,#ff6aa0 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+
+.glitch{ position:relative; display:inline-block; }
+.glitch::before,.glitch::after{
+  content:attr(data-text); position:absolute; inset:0; background:var(--void);
+  clip-path:inset(0 0 100% 0);
+}
+.glitch::before{ color:#00f3ff; transform:translate(-2px,0); animation:gl1 4.2s infinite steps(2,end); }
+.glitch::after { color:#ff0055; transform:translate( 2px,0); animation:gl2 3.4s infinite steps(2,end); }
+@keyframes gl1{
+  0%,88%,100%{clip-path:inset(0 0 100% 0);} 90%{clip-path:inset(12% 0 62% 0);} 93%{clip-path:inset(48% 0 30% 0);} 96%{clip-path:inset(72% 0 8% 0);}
+}
+@keyframes gl2{
+  0%,84%,100%{clip-path:inset(0 0 100% 0);} 86%{clip-path:inset(66% 0 18% 0);} 91%{clip-path:inset(24% 0 55% 0);} 95%{clip-path:inset(5% 0 82% 0);}
+}
+
+.flicker{ animation:flicker 5s infinite; }
+@keyframes flicker{
+  0%,19%,21%,23%,25%,54%,56%,100%{opacity:1;} 20%,24%,55%{opacity:.55;} 22%{opacity:.78;}
+}
+
+/* ============================================================
+   MISC ANIMATIONS
+============================================================ */
+@keyframes floaty{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-16px);} }
+.animate-floaty{ animation:floaty 6.5s ease-in-out infinite; }
+
+@keyframes pulseRing{
+  0%{ box-shadow:0 0 0 0 rgba(0,243,255,.45);} 70%{ box-shadow:0 0 0 16px rgba(0,243,255,0);} 100%{ box-shadow:0 0 0 0 rgba(0,243,255,0);}
+}
+.pulse-ring{ animation:pulseRing 2.2s infinite; }
+
+@keyframes spinSlow{ to{ transform:rotate(360deg);} }
+.spin-slow{ animation:spinSlow 14s linear infinite; }
+.spin-rev{ animation:spinSlow 22s linear infinite reverse; }
+
+@keyframes barPulse{ 0%,100%{opacity:.55;} 50%{opacity:1;} }
+.bar-pulse{ animation:barPulse 2.4s ease-in-out infinite; }
+
+/* Marquee ticker */
+.ticker-track{ display:flex; width:max-content; animation:ticker 26s linear infinite; }
+@keyframes ticker{ from{ transform:translateX(0);} to{ transform:translateX(-50%);} }
+
+/* Reveal on scroll */
+.reveal{ opacity:0; transform:translateY(34px); transition:opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1); }
+.reveal.is-visible{ opacity:1; transform:none; }
+
+/* Radial gauge */
+.gauge{
+  --p:0;
+  background:conic-gradient(var(--neon) calc(var(--p)*1%), rgba(0,243,255,.10) 0);
+  border-radius:50%;
+  transition:background .6s linear;
+}
+.gauge-inner{ background:radial-gradient(circle at 50% 40%, #0d1018, #06070c 70%); }
+
+/* Terminal */
+#terminalOut{ font-family:'Rajdhani',monospace; }
+#terminalOut::-webkit-scrollbar{ width:6px; }
+.caret{ display:inline-block; width:9px; height:16px; background:var(--neon); vertical-align:-2px; animation:blink 1s steps(1) infinite; box-shadow:0 0 10px var(--neon); }
+@keyframes blink{ 50%{ opacity:0; } }
+
+/* Countdown digit */
+.cd-box{ background:linear-gradient(180deg, rgba(0,243,255,.10), rgba(6,7,12,.85)); }
+.cd-num{ font-variant-numeric:tabular-nums; }
+
+/* Modal */
+.modal-enter{ animation:modalIn .35s cubic-bezier(.16,1,.3,1) both; }
+@keyframes modalIn{ from{ opacity:0; transform:translateY(26px) scale(.96);} to{ opacity:1; transform:none; } }
+.input-cyber{
+  background:rgba(6,7,12,.85); border:1px solid rgba(0,243,255,.22); color:#e2e8f0;
+  transition:border-color .25s ease, box-shadow .25s ease, background .25s ease;
+}
+.input-cyber:focus{
+  outline:none; border-color:var(--neon); background:rgba(0,243,255,.06);
+  box-shadow:0 0 0 3px rgba(0,243,255,.12), 0 0 22px -4px rgba(0,243,255,.6);
+}
+.input-cyber.err{ border-color:var(--hot) !important; box-shadow:0 0 0 3px rgba(255,0,85,.14) !important; }
+
+/* Preloader */
+#boot{ position:fixed; inset:0; z-index:200; background:#05050b; display:grid; place-items:center; transition:opacity .6s ease, visibility .6s ease; }
+#boot.done{ opacity:0; visibility:hidden; }
+
+/* Focus visibility */
+a:focus-visible, button:focus-visible, input:focus-visible{
+  outline:2px solid var(--neon); outline-offset:3px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
+  .reveal{ opacity:1 !important; transform:none !important; }
+}
+</style>
+</head>
+
+<body class="bg-void font-body antialiased">
+
+<!-- ===================== BOOT SPLASH ===================== -->
+<div id="boot" role="status" aria-label="System booting">
+  <div class="text-center px-6">
+    <div class="mx-auto mb-6 h-16 w-16 rounded-full border-2 border-neon/30 border-t-neon spin-slow"></div>
+    <p class="font-display text-xs sm:text-sm tracking-[.42em] text-neon text-glow">INITIALIZING CYBORG CORE</p>
+    <div class="mt-5 h-[3px] w-56 sm:w-72 mx-auto bg-neon/15 overflow-hidden">
+      <div id="bootBar" class="h-full w-0 bg-gradient-to-r from-neon to-hot transition-[width] duration-200"></div>
+    </div>
+    <p id="bootPct" class="mt-3 font-display text-[10px] tracking-[.3em] text-ash">0%</p>
+  </div>
+</div>
+
+<!-- ===================== BACKGROUND FX ===================== -->
+<div class="fx-layer fx-grid" aria-hidden="true"></div>
+<div class="fx-layer overflow-hidden" aria-hidden="true">
+  <span class="blob blob-a"></span><span class="blob blob-b"></span><span class="blob blob-c"></span>
+</div>
+<div class="fx-layer fx-sweep overflow-hidden" aria-hidden="true"></div>
+<div class="fx-layer fx-scan" aria-hidden="true"></div>
+<div class="fx-layer fx-vignette" aria-hidden="true"></div>
+<div id="cursorGlow" aria-hidden="true"></div>
+
+<!-- Scroll progress -->
+<div class="fixed top-0 left-0 right-0 h-[2px] z-[95] bg-transparent" aria-hidden="true">
+  <div id="scrollBar" class="h-full w-0 bg-gradient-to-r from-neon via-white to-hot shadow-[0_0_12px_#00f3ff]"></div>
+</div>
+
+<!-- ===================== NAVBAR ===================== -->
+<header id="navbar" class="fixed top-0 inset-x-0 z-[90] transition-all duration-300">
+  <nav class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Primary">
+    <div id="navShell" class="mt-3 flex items-center justify-between gap-4 rounded-none glass px-4 sm:px-6 py-3 transition-all duration-300">
+
+      <!-- Brand -->
+      <a href="#home" class="group flex items-center gap-3 shrink-0">
+        <span class="relative grid h-9 w-9 sm:h-10 sm:w-10 place-items-center">
+          <span class="absolute inset-0 rounded-full border border-neon/40 spin-slow"></span>
+          <span class="absolute inset-1.5 rounded-full border border-hot/40 spin-rev"></span>
+          <span class="h-2 w-2 rounded-full bg-neon pulse-ring"></span>
+        </span>
+        <span class="leading-none">
+          <span class="block font-display text-[11px] sm:text-sm font-black tracking-[.22em] text-steel group-hover:text-neon transition-colors">CYBORG</span>
+          <span class="block font-display text-[8px] sm:text-[9px] tracking-[.3em] text-neon/70">// TECHFEST IIT BOMBAY</span>
+        </span>
+      </a>
+
+      <!-- Desktop links -->
+      <ul class="hidden lg:flex items-center gap-8 font-display text-[11px] font-medium tracking-[.2em] text-steel/80">
+        <li><a href="#home"          class="nav-link hover:text-neon transition-colors">HOME</a></li>
+        <li><a href="#augmentations" class="nav-link hover:text-neon transition-colors">AUGMENTATIONS</a></li>
+        <li><a href="#events"        class="nav-link hover:text-neon transition-colors">EVENTS</a></li>
+        <li><a href="#terminal"      class="nav-link hover:text-neon transition-colors">TERMINAL</a></li>
+      </ul>
+
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button type="button" data-modal-open
+          class="hidden sm:inline-flex btn-clip btn-primary px-5 py-2.5 font-display text-[10px] tracking-[.2em]">
+          REGISTER
+        </button>
+
+        <!-- Hamburger -->
+        <button id="navToggle" type="button" aria-expanded="false" aria-controls="mobileMenu" aria-label="Toggle navigation menu"
+          class="lg:hidden relative grid h-10 w-10 place-items-center border border-neon/30 bg-neon/5 hover:bg-neon/15 transition-colors">
+          <span class="sr-only">Menu</span>
+          <span class="block h-[2px] w-5 bg-neon transition-transform duration-300" data-bar="1"></span>
+          <span class="block h-[2px] w-5 bg-neon my-[5px] transition-opacity duration-200" data-bar="2"></span>
+          <span class="block h-[2px] w-5 bg-neon transition-transform duration-300" data-bar="3"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile menu -->
+    <div id="mobileMenu" class="lg:hidden overflow-hidden max-h-0 transition-[max-height] duration-500 ease-in-out">
+      <ul class="glass mt-2 divide-y divide-neon/10 font-display text-[12px] tracking-[.24em]">
+        <li><a href="#home"          class="mob-link block px-6 py-4 text-steel/85 hover:text-neon hover:bg-neon/5 transition">HOME</a></li>
+        <li><a href="#augmentations" class="mob-link block px-6 py-4 text-steel/85 hover:text-neon hover:bg-neon/5 transition">AUGMENTATIONS</a></li>
+        <li><a href="#events"        class="mob-link block px-6 py-4 text-steel/85 hover:text-neon hover:bg-neon/5 transition">EVENTS</a></li>
+        <li><a href="#terminal"      class="mob-link block px-6 py-4 text-steel/85 hover:text-neon hover:bg-neon/5 transition">TERMINAL</a></li>
+        <li><a href="#register"      class="mob-link block px-6 py-4 text-hot hover:bg-hot/5 transition">REGISTER →</a></li>
+      </ul>
+    </div>
+  </nav>
+</header>
+
+<main class="relative z-10">
+
+<!-- ===================== HERO ===================== -->
+<section id="home" class="relative min-h-[100svh] flex items-center pt-32 pb-20 sm:pt-36">
+  <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="grid items-center gap-14 lg:grid-cols-12 lg:gap-10">
+
+      <!-- Copy -->
+      <div class="lg:col-span-7 reveal">
+        <div class="inline-flex items-center gap-3 border border-neon/25 bg-neon/5 px-3 py-1.5 mb-7">
+          <span class="h-1.5 w-1.5 rounded-full bg-hot pulse-ring"></span>
+          <span class="font-display text-[9px] sm:text-[10px] tracking-[.3em] text-neon/90">SYSTEM ONLINE // EDITION 29 // POWAI SECTOR</span>
+        </div>
+
+        <h1 class="font-display font-black uppercase leading-[0.95] text-steel" style="font-size:clamp(2.1rem,7vw,4.6rem)">
+          <span class="glitch block" data-text="EVOLVE">EVOLVE</span>
+          <span class="block text-glow">BEYOND</span>
+          <span class="block grad-text">HUMAN LIMITS</span>
+        </h1>
+
+        <p class="mt-7 max-w-2xl text-base sm:text-lg text-ash leading-relaxed">
+          <span class="text-neon font-semibold">CYBORG</span> is the flagship human-augmentation arena at
+          <span class="text-steel font-semibold">Techfest, IIT Bombay</span> — Asia's largest science &amp; technology festival.
+          Where neural intelligence fuses with bionic robotics, and 175,000+ minds rewrite what the body is allowed to do.
+        </p>
+
+        <div class="mt-9 flex flex-col sm:flex-row gap-4">
+          <button type="button" data-modal-open
+            class="btn-clip btn-primary px-8 py-4 font-display text-xs sm:text-sm tracking-[.2em]">
+            ENTER THE MATRIX
+          </button>
+          <a href="#augmentations"
+            class="btn-clip btn-ghost px-8 py-4 text-center font-display text-xs sm:text-sm tracking-[.2em]">
+            EXPLORE TECHFEST
+          </a>
+        </div>
+
+        <!-- Mini stats -->
+        <dl class="mt-12 grid grid-cols-3 gap-3 sm:gap-6 max-w-lg">
+          <div class="hud glass p-3 sm:p-4">
+            <dt class="font-display text-[8px] sm:text-[9px] tracking-[.22em] text-ash">FOOTFALL</dt>
+            <dd class="mt-1 font-display text-lg sm:text-2xl font-bold text-neon"><span class="counter" data-target="175" data-suffix="K+">0</span></dd>
+          </div>
+          <div class="hud glass p-3 sm:p-4">
+            <dt class="font-display text-[8px] sm:text-[9px] tracking-[.22em] text-ash">COUNTRIES</dt>
+            <dd class="mt-1 font-display text-lg sm:text-2xl font-bold text-hot"><span class="counter" data-target="24" data-suffix="+">0</span></dd>
+          </div>
+          <div class="hud glass p-3 sm:p-4">
+            <dt class="font-display text-[8px] sm:text-[9px] tracking-[.22em] text-ash">PRIZE POOL</dt>
+            <dd class="mt-1 font-display text-lg sm:text-2xl font-bold text-steel">₹<span class="counter" data-target="1.2" data-decimals="1" data-suffix="Cr">0</span></dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- HUD CARD WIDGET -->
+      <div class="lg:col-span-5 reveal">
+        <div class="relative mx-auto max-w-md animate-floaty">
+          <!-- orbit rings -->
+          <span class="pointer-events-none absolute -inset-6 sm:-inset-10 rounded-full border border-neon/10 spin-slow" aria-hidden="true"></span>
+          <span class="pointer-events-none absolute -inset-2 sm:-inset-4 rounded-full border border-dashed border-hot/10 spin-rev" aria-hidden="true"></span>
+
+          <article class="hud glass relative p-5 sm:p-6">
+            <header class="flex items-center justify-between border-b border-neon/15 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full bg-neon pulse-ring"></span>
+                <h2 class="font-display text-[10px] tracking-[.26em] text-neon">CYBORG UNIT // CX-29</h2>
+              </div>
+              <span class="font-display text-[9px] tracking-[.2em] text-hot flicker">● LIVE</span>
+            </header>
+
+            <!-- Gauge + identity -->
+            <div class="mt-5 flex items-center gap-5">
+              <div id="gauge" class="gauge grid h-24 w-24 sm:h-28 sm:w-28 shrink-0 place-items-center" style="--p:0">
+                <div class="gauge-inner grid h-[78%] w-[78%] place-items-center rounded-full border border-neon/20">
+                  <span class="font-display text-lg sm:text-xl font-bold text-neon text-glow"><span id="gaugeVal">0</span>%</span>
+                  <span class="font-display text-[7px] tracking-[.2em] text-ash">SYNC</span>
+                </div>
+              </div>
+              <div class="min-w-0">
+                <p class="font-display text-[9px] tracking-[.24em] text-ash">OPERATOR</p>
+                <p class="truncate font-display text-base sm:text-lg font-bold text-steel">ANONYMOUS_07</p>
+                <p class="mt-2 font-display text-[9px] tracking-[.24em] text-ash">CORE TEMP</p>
+                <p class="font-display text-sm font-semibold text-hot"><span id="tempVal">36.4</span> °C</p>
+              </div>
+            </div>
+
+            <!-- Stat bars -->
+            <div class="mt-6 space-y-4">
+              <div>
+                <div class="flex justify-between font-display text-[9px] tracking-[.2em]">
+                  <span class="text-ash">AUGMENTATION UNITS</span>
+                  <span class="text-neon"><span class="counter" data-target="99.8" data-decimals="1" data-suffix="%">0</span></span>
+                </div>
+                <div class="mt-1.5 h-1.5 w-full bg-neon/10">
+                  <div class="statbar h-full bg-gradient-to-r from-neon to-cyan-200 shadow-[0_0_12px_#00f3ff]" data-w="99.8" style="width:0%;transition:width 1.6s cubic-bezier(.16,1,.3,1)"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between font-display text-[9px] tracking-[.2em]">
+                  <span class="text-ash">NEURAL SYNC RATE</span>
+                  <span class="text-hot"><span class="counter" data-target="100" data-suffix=" Hz">0</span></span>
+                </div>
+                <div class="mt-1.5 h-1.5 w-full bg-hot/10">
+                  <div class="statbar h-full bg-gradient-to-r from-hot to-pink-300 shadow-[0_0_12px_#ff0055]" data-w="100" style="width:0%;transition:width 1.8s cubic-bezier(.16,1,.3,1)"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between font-display text-[9px] tracking-[.2em]">
+                  <span class="text-ash">EXO-SKELETAL TORQUE</span>
+                  <span class="text-steel"><span class="counter" data-target="847" data-suffix=" Nm">0</span></span>
+                </div>
+                <div class="mt-1.5 h-1.5 w-full bg-white/10">
+                  <div class="statbar h-full bg-gradient-to-r from-slate-200 to-neon shadow-[0_0_12px_rgba(226,232,240,.6)]" data-w="84" style="width:0%;transition:width 2s cubic-bezier(.16,1,.3,1)"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Waveform -->
+            <div class="mt-6 border-t border-neon/15 pt-4">
+              <div class="flex items-end justify-between gap-[3px] h-12" id="wave" aria-hidden="true"></div>
+              <p class="mt-2 font-display text-[8px] tracking-[.26em] text-ash">EEG STREAM // CHANNEL 07 // STABLE</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TICKER ===================== -->
+<div class="relative z-10 border-y border-neon/15 bg-black/50 py-3 overflow-hidden" aria-hidden="true">
+  <div class="ticker-track font-display text-[10px] sm:text-xs tracking-[.3em] text-neon/70">
+    <span class="flex shrink-0">
+      <span class="px-6">NEURAL LINK ESTABLISHED</span><span class="px-6 text-hot">◆</span>
+      <span class="px-6">TECHFEST IIT BOMBAY 2025-26</span><span class="px-6 text-hot">◆</span>
+      <span class="px-6">ROBOWARS ARENA CHARGED</span><span class="px-6 text-hot">◆</span>
+      <span class="px-6">QUANTUM CORE @ 99.8%</span><span class="px-6 text-hot">◆</span>
+      <span class="px-6">175,000+ OPERATORS SYNCED</span><span class="px-6 text-hot">◆</span>
+      <span class="px-6">EVOLVE BEYOND HUMAN LIMITS</span><span class="px-6 text-hot">◆</span>
+    </span>
+    <span class="flex shrink-0">
+      <span class="px-6">NEURAL LINK ESTABLISHED</span><span class="px-6 text-hot">◆</span>
+      <span class="px-6">TECHFEST IIT BOMBAY 2025-26</span><span class="px-6 text-hot">◆</span>
+      <span class="px-6">ROBOWARS ARENA CHARGED</span><span class="px-6 text-hot">◆</span>
+      <span class="px-6">QUANTUM CORE @ 99.8%</span><span class="px-6 text-hot">◆</span>
+      <span class="px-6">175,000+ OPERATORS SYNCED</span><span class="px-6 text-hot">◆</span>
+      <span class="px-6">EVOLVE BEYOND HUMAN LIMITS</span><span class="px-6 text-hot">◆</span>
+    </span>
+  </div>
+</div>
+
+<!-- ===================== AUGMENTATIONS ===================== -->
+<section id="augmentations" class="relative py-24 sm:py-32">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+    <div class="mb-14 max-w-3xl reveal">
+      <p class="font-display text-[10px] tracking-[.4em] text-hot mb-3">// MODULE INDEX 01</p>
+      <h2 class="font-display text-3xl sm:text-5xl font-black uppercase text-steel leading-tight">
+        AUGMENTATION <span class="grad-text">MODULES</span>
+      </h2>
+      <p class="mt-5 text-ash text-base sm:text-lg leading-relaxed">
+        Four production-grade subsystems demoed live at Techfest. Each module is battle-tested in the CYBORG arena
+        by teams from 24+ countries.
+      </p>
+    </div>
+
+    <div class="grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4">
+
+      <!-- 01 -->
+      <article class="hud cyber-card glass p-6 reveal" style="transition-delay:.05s">
+        <div class="flex items-start justify-between">
+          <span class="grid h-12 w-12 place-items-center border border-neon/30 bg-neon/5 text-neon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3a3 3 0 00-3 3v.2A3 3 0 006.2 9 3 3 0 006 15a3 3 0 003 3v.2A3 3 0 0015 21a3 3 0 003-3 3 3 0 000-6 3 3 0 00-2.8-2.8V9A3 3 0 0012 3z"/>
+              <path stroke-linecap="round" d="M12 8v8M9.5 12h5"/>
+            </svg>
+          </span>
+          <span class="font-display text-3xl font-black text-white/5">01</span>
+        </div>
+        <h3 class="mt-6 font-display text-base font-bold tracking-wide text-steel">NEURAL INTERFACE INTEGRATION</h3>
+        <p class="mt-3 text-sm text-ash leading-relaxed">
+          Non-invasive 512-channel BCI arrays translating cortical intent into machine command in under 8 ms.
+        </p>
+        <ul class="mt-5 space-y-1.5 font-display text-[9px] tracking-[.18em] text-neon/75">
+          <li>› LATENCY 7.4 MS</li><li>› 512 CHANNELS</li><li>› ADAPTIVE ML DECODER</li>
+        </ul>
+      </article>
+
+      <!-- 02 -->
+      <article class="hud hud-hot cyber-card glass p-6 reveal" style="transition-delay:.12s">
+        <div class="flex items-start justify-between">
+          <span class="grid h-12 w-12 place-items-center border border-hot/30 bg-hot/5 text-hot">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 3v5a5 5 0 005 5 5 5 0 015 5v3M7 8h10M5 21h4M15 21h4M17 3v5"/>
+            </svg>
+          </span>
+          <span class="font-display text-3xl font-black text-white/5">02</span>
+        </div>
+        <h3 class="mt-6 font-display text-base font-bold tracking-wide text-steel">BIONIC EXOSKELETONS</h3>
+        <p class="mt-3 text-sm text-ash leading-relaxed">
+          Carbon-lattice powered frames delivering 847 Nm torque with regenerative kinetic harvesting.
+        </p>
+        <ul class="mt-5 space-y-1.5 font-display text-[9px] tracking-[.18em] text-hot/75">
+          <li>› 847 NM TORQUE</li><li>› 14 HR ENDURANCE</li><li>› GAIT SELF-CALIBRATION</li>
+        </ul>
+      </article>
+
+      <!-- 03 -->
+      <article class="hud cyber-card glass p-6 reveal" style="transition-delay:.19s">
+        <div class="flex items-start justify-between">
+          <span class="grid h-12 w-12 place-items-center border border-neon/30 bg-neon/5 text-neon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </span>
+          <span class="font-display text-3xl font-black text-white/5">03</span>
+        </div>
+        <h3 class="mt-6 font-display text-base font-bold tracking-wide text-steel">CYBERNETIC VISION &amp; AI ANALYTICS</h3>
+        <p class="mt-3 text-sm text-ash leading-relaxed">
+          Multispectral optics with on-device inference — thermal, LiDAR and object semantics in real time.
+        </p>
+        <ul class="mt-5 space-y-1.5 font-display text-[9px] tracking-[.18em] text-neon/75">
+          <li>› 8K MULTISPECTRAL</li><li>› 120 FPS INFERENCE</li><li>› EDGE NPU ONBOARD</li>
+        </ul>
+      </article>
+
+      <!-- 04 -->
+      <article class="hud hud-hot cyber-card glass p-6 reveal" style="transition-delay:.26s">
+        <div class="flex items-start justify-between">
+          <span class="grid h-12 w-12 place-items-center border border-hot/30 bg-hot/5 text-hot">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <rect x="7" y="7" width="10" height="10" rx="1.5"/>
+              <path stroke-linecap="round" d="M10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4"/>
+            </svg>
+          </span>
+          <span class="font-display text-3xl font-black text-white/5">04</span>
+        </div>
+        <h3 class="mt-6 font-display text-base font-bold tracking-wide text-steel">QUANTUM PROCESSING UNITS</h3>
+        <p class="mt-3 text-sm text-ash leading-relaxed">
+          Cryo-stabilised 128-qubit co-processors solving pathfinding and control problems in constant time.
+        </p>
+        <ul class="mt-5 space-y-1.5 font-display text-[9px] tracking-[.18em] text-hot/75">
+          <li>› 128 QUBITS</li><li>› 0.4 mK CRYO CELL</li><li>› ERROR-CORRECTED</li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== EVENTS ===================== -->
+<section id="events" class="relative py-24 sm:py-32 border-t border-neon/10">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="mb-14 flex flex-col gap-6 md:flex-row md:items-end md:justify-between reveal">
+      <div class="max-w-2xl">
+        <p class="font-display text-[10px] tracking-[.4em] text-neon mb-3">// MODULE INDEX 02</p>
+        <h2 class="font-display text-3xl sm:text-5xl font-black uppercase text-steel leading-tight">
+          COMPETITION <span class="text-hot text-glow-hot">GRID</span>
+        </h2>
+      </div>
+      <p class="text-ash md:max-w-sm text-sm sm:text-base">
+        Six live arenas. One December weekend. Powai campus goes fully augmented.
+      </p>
+    </div>
+
+    <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+
+      <article class="hud cyber-card glass p-6 reveal">
+        <div class="flex items-center justify-between font-display text-[9px] tracking-[.22em]">
+          <span class="border border-hot/40 bg-hot/10 px-2 py-1 text-hot">COMBAT</span>
+          <span class="text-ash">19 DEC · 10:00</span>
+        </div>
+        <h3 class="mt-5 font-display text-xl font-bold text-steel">ROBOWARS</h3>
+        <p class="mt-3 text-sm text-ash leading-relaxed">15 kg armoured combat bots. Last chassis standing claims the arena.</p>
+        <p class="mt-5 font-display text-[10px] tracking-[.2em] text-neon">PRIZE ₹12,00,000</p>
+      </article>
+
+      <article class="hud cyber-card glass p-6 reveal" style="transition-delay:.07s">
+        <div class="flex items-center justify-between font-display text-[9px] tracking-[.22em]">
+          <span class="border border-neon/40 bg-neon/10 px-2 py-1 text-neon">AUTONOMY</span>
+          <span class="text-ash">19 DEC · 14:00</span>
+        </div>
+        <h3 class="mt-5 font-display text-xl font-bold text-steel">MELTDOWN</h3>
+        <p class="mt-3 text-sm text-ash leading-relaxed">Manual rovers versus a collapsing terrain track. Traction is everything.</p>
+        <p class="mt-5 font-display text-[10px] tracking-[.2em] text-neon">PRIZE ₹4,50,000</p>
+      </article>
+
+      <article class="hud cyber-card glass p-6 reveal" style="transition-delay:.14s">
+        <div class="flex items-center justify-between font-display text-[9px] tracking-[.22em]">
+          <span class="border border-hot/40 bg-hot/10 px-2 py-1 text-hot">NEURAL</span>
+          <span class="text-ash">20 DEC · 09:30</span>
+        </div>
+        <h3 class="mt-5 font-display text-xl font-bold text-steel">CORTEX HACK</h3>
+        <p class="mt-3 text-sm text-ash leading-relaxed">36-hour BCI hackathon — decode EEG signals into real prosthetic motion.</p>
+        <p class="mt-5 font-display text-[10px] tracking-[.2em] text-neon">PRIZE ₹6,00,000</p>
+      </article>
+
+      <article class="hud cyber-card glass p-6 reveal" style="transition-delay:.21s">
+        <div class="flex items-center justify-between font-display text-[9px] tracking-[.22em]">
+          <span class="border border-neon/40 bg-neon/10 px-2 py-1 text-neon">SPEED</span>
+          <span class="text-ash">20 DEC · 16:00</span>
+        </div>
+        <h3 class="mt-5 font-display text-xl font-bold text-steel">FULL THROTTLE</h3>
+        <p class="mt-3 text-sm text-ash leading-relaxed">RC endurance racing on a hostile obstacle circuit built by the Powai crew.</p>
+        <p class="mt-5 font-display text-[10px] tracking-[.2em] text-neon">PRIZE ₹3,00,000</p>
+      </article>
+
+      <article class="hud cyber-card glass p-6 reveal" style="transition-delay:.28s">
+        <div class="flex items-center justify-between font-display text-[9px] tracking-[.22em]">
+          <span class="border border-hot/40 bg-hot/10 px-2 py-1 text-hot">EXO</span>
+          <span class="text-ash">21 DEC · 11:00</span>
+        </div>
+        <h3 class="mt-5 font-display text-xl font-bold text-steel">IRON FRAME</h3>
+        <p class="mt-3 text-sm text-ash leading-relaxed">Wearable exoskeleton trials: load carry, sprint and precision manipulation.</p>
+        <p class="mt-5 font-display text-[10px] tracking-[.2em] text-neon">PRIZE ₹5,00,000</p>
+      </article>
+
+      <article class="hud cyber-card glass p-6 reveal" style="transition-delay:.35s">
+        <div class="flex items-center justify-between font-display text-[9px] tracking-[.22em]">
+          <span class="border border-neon/40 bg-neon/10 px-2 py-1 text-neon">SHOWCASE</span>
+          <span class="text-ash">21 DEC · 18:00</span>
+        </div>
+        <h3 class="mt-5 font-display text-xl font-bold text-steel">SINGULARITY EXPO</h3>
+        <p class="mt-3 text-sm text-ash leading-relaxed">Keynotes, robotics exhibitions and the CYBORG closing light-sequence.</p>
+        <p class="mt-5 font-display text-[10px] tracking-[.2em] text-neon">FREE ENTRY</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TERMINAL ===================== -->
+<section id="terminal" class="relative py-24 sm:py-32 border-t border-neon/10">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="grid gap-12 lg:grid-cols-12 lg:gap-10 items-start">
+
+      <div class="lg:col-span-4 reveal">
+        <p class="font-display text-[10px] tracking-[.4em] text-hot mb-3">// MODULE INDEX 03</p>
+        <h2 class="font-display text-3xl sm:text-4xl font-black uppercase text-steel leading-tight">
+          LIVE HUD <span class="grad-text">CONSOLE</span>
+        </h2>
+        <p class="mt-5 text-ash leading-relaxed">
+          Direct read-out from the CX-29 diagnostic bus. Boot sequence, subsystem handshakes and
+          continuous telemetry — streamed as it happens.
+        </p>
+
+        <div class="mt-8 space-y-3">
+          <div class="flex items-center gap-3 font-display text-[10px] tracking-[.2em] text-ash">
+            <span class="h-1.5 w-1.5 rounded-full bg-neon bar-pulse"></span> BUS: /dev/cortex0
+          </div>
+          <div class="flex items-center gap-3 font-display text-[10px] tracking-[.2em] text-ash">
+            <span class="h-1.5 w-1.5 rounded-full bg-hot bar-pulse"></span> ENCRYPTION: AES-512-Q
+          </div>
+          <div class="flex items-center gap-3 font-display text-[10px] tracking-[.2em] text-ash">
+            <span class="h-1.5 w-1.5 rounded-full bg-steel bar-pulse"></span> UPTIME: <span id="uptime">00:00:00</span>
+          </div>
+        </div>
+
+        <button id="rebootBtn" type="button"
+          class="mt-8 btn-clip btn-ghost px-7 py-3.5 font-display text-[11px] tracking-[.22em]">
+          ⟳ RUN DIAGNOSTICS
+        </button>
+      </div>
+
+      <div class="lg:col-span-8 reveal" style="transition-delay:.1s">
+        <div class="hud glass overflow-hidden">
+          <!-- title bar -->
+          <div class="flex items-center justify-between border-b border-neon/15 bg-black/40 px-4 py-3">
+            <div class="flex items-center gap-2">
+              <span class="h-2.5 w-2.5 rounded-full bg-hot/80"></span>
+              <span class="h-2.5 w-2.5 rounded-full bg-yellow-400/70"></span>
+              <span class="h-2.5 w-2.5 rounded-full bg-neon/80"></span>
+              <span class="ml-3 font-display text-[9px] tracking-[.24em] text-ash">root@cyborg-cx29:~/techfest</span>
+            </div>
+            <span class="font-display text-[9px] tracking-[.24em] text-neon/70 hidden sm:block">SECURE SHELL</span>
+          </div>
+          <!-- output -->
+          <div id="terminalOut"
+               class="h-[340px] sm:h-[420px] overflow-y-auto bg-[#05060b]/90 px-4 sm:px-6 py-4 text-[12px] sm:text-[13.5px] leading-6 text-neon/85"
+               role="log" aria-live="polite" aria-label="System diagnostics output"></div>
+          <!-- prompt -->
+          <div class="flex items-center gap-2 border-t border-neon/15 bg-black/40 px-4 py-3 font-display text-[11px] tracking-widest">
+            <span class="text-hot">λ</span><span class="text-ash">cyborg@techfest</span><span class="text-neon">:~$</span>
+            <span class="caret"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== COUNTDOWN + REGISTER ===================== -->
+<section id="register" class="relative py-24 sm:py-32 border-t border-neon/10">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="hud glass relative overflow-hidden p-7 sm:p-12 reveal">
+      <div class="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-hot/20 blur-[70px]" aria-hidden="true"></div>
+      <div class="pointer-events-none absolute -left-16 -bottom-16 h-56 w-56 rounded-full bg-neon/20 blur-[70px]" aria-hidden="true"></div>
+
+      <div class="relative grid gap-12 lg:grid-cols-2 lg:items-center">
+        <div>
+          <p class="font-display text-[10px] tracking-[.4em] text-neon mb-3">// SYSTEM ACTIVATION IN</p>
+          <h2 class="font-display text-3xl sm:text-5xl font-black uppercase text-steel leading-tight">
+            THE COUNTDOWN <span class="text-hot text-glow-hot">HAS BEGUN</span>
+          </h2>
+          <p class="mt-5 text-ash leading-relaxed">
+            Techfest, IIT Bombay — <span id="eventDate" class="text-steel font-semibold">December 19–21</span>, Powai Campus, Mumbai.
+            Registrations for the CYBORG arena are open to all colleges worldwide.
+          </p>
+
+          <div id="countdown" class="mt-9 grid grid-cols-4 gap-2 sm:gap-4 max-w-lg">
+            <div class="cd-box hud border border-neon/20 p-3 sm:p-4 text-center">
+              <div class="cd-num font-display text-2xl sm:text-4xl font-black text-neon text-glow" id="cd-days">00</div>
+              <div class="mt-1 font-display text-[8px] sm:text-[9px] tracking-[.22em] text-ash">DAYS</div>
+            </div>
+            <div class="cd-box hud border border-neon/20 p-3 sm:p-4 text-center">
+              <div class="cd-num font-display text-2xl sm:text-4xl font-black text-neon text-glow" id="cd-hours">00</div>
+              <div class="mt-1 font-display text-[8px] sm:text-[9px] tracking-[.22em] text-ash">HRS</div>
+            </div>
+            <div class="cd-box hud border border-neon/20 p-3 sm:p-4 text-center">
+              <div class="cd-num font-display text-2xl sm:text-4xl font-black text-neon text-glow" id="cd-mins">00</div>
+              <div class="mt-1 font-display text-[8px] sm:text-[9px] tracking-[.22em] text-ash">MIN</div>
+            </div>
+            <div class="cd-box hud hud-hot border border-hot/25 p-3 sm:p-4 text-center">
+              <div class="cd-num font-display text-2xl sm:text-4xl font-black text-hot text-glow-hot" id="cd-secs">00</div>
+              <div class="mt-1 font-display text-[8px] sm:text-[9px] tracking-[.22em] text-ash">SEC</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:pl-8 lg:border-l lg:border-neon/15">
+          <h3 class="font-display text-lg sm:text-xl font-bold text-steel">INITIALIZE REGISTRATION</h3>
+          <p class="mt-3 text-sm text-ash leading-relaxed">
+            Claim your operator ID, unlock arena access, workshop passes and the official CYBORG neural kit.
+            Zero registration fee for the first 5,000 operators.
+          </p>
+          <ul class="mt-6 space-y-2.5 text-sm text-ash">
+            <li class="flex gap-3"><span class="text-neon">▹</span> Access to all 6 competition arenas</li>
+            <li class="flex gap-3"><span class="text-neon">▹</span> Certificate from Techfest, IIT Bombay</li>
+            <li class="flex gap-3"><span class="text-neon">▹</span> Accommodation assistance on campus</li>
+            <li class="flex gap-3"><span class="text-neon">▹</span> Priority entry to the Singularity Expo</li>
+          </ul>
+          <button type="button" data-modal-open
+            class="mt-8 w-full sm:w-auto btn-clip btn-hot px-9 py-4 font-display text-xs tracking-[.22em]">
+            ⚡ INITIALIZE REGISTRATION
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="relative z-10 border-t border-neon/15 bg-black/50">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14">
+    <div class="grid gap-10 md:grid-cols-12">
+
+      <div class="md:col-span-5">
+        <div class="flex items-center gap-3">
+          <span class="relative grid h-10 w-10 place-items-center">
+            <span class="absolute inset-0 rounded-full border border-neon/40 spin-slow"></span>
+            <span class="h-2 w-2 rounded-full bg-hot pulse-ring"></span>
+          </span>
+          <span>
+            <span class="block font-display text-sm font-black tracking-[.22em] text-steel">CYBORG</span>
+            <span class="block font-display text-[9px] tracking-[.3em] text-neon/70">// TECHFEST IIT BOMBAY</span>
+          </span>
+        </div>
+        <p class="mt-5 max-w-sm text-sm text-ash leading-relaxed">
+          Asia's largest science and technology festival, organised by the students of the
+          Indian Institute of Technology Bombay. Powai, Mumbai — 400076.
+        </p>
+      </div>
+
+      <nav class="md:col-span-3" aria-label="Footer navigation">
+        <h4 class="font-display text-[10px] tracking-[.28em] text-neon mb-4">NAVIGATE</h4>
+        <ul class="space-y-2.5 text-sm text-ash">
+          <li><a href="#home" class="hover:text-neon transition-colors">Home</a></li>
+          <li><a href="#augmentations" class="hover:text-neon transition-colors">Augmentations</a></li>
+          <li><a href="#events" class="hover:text-neon transition-colors">Events</a></li>
+          <li><a href="#terminal" class="hover:text-neon transition-colors">Terminal</a></li>
+          <li><a href="#register" class="hover:text-neon transition-colors">Register</a></li>
+        </ul>
+      </nav>
+
+      <div class="md:col-span-4">
+        <h4 class="font-display text-[10px] tracking-[.28em] text-neon mb-4">UPLINK</h4>
+        <div class="flex flex-wrap gap-3">
+          <a href="#" aria-label="Instagram" class="hud grid h-11 w-11 place-items-center border border-neon/20 bg-neon/5 text-steel hover:text-neon hover:bg-neon/15 transition-colors">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <a href="#" aria-label="X (Twitter)" class="hud grid h-11 w-11 place-items-center border border-neon/20 bg-neon/5 text-steel hover:text-neon hover:bg-neon/15 transition-colors">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 3h3l-6.6 7.6L21.8 21h-6l-4.7-6.1L5.6 21h-3l7.1-8.1L2.5 3h6.2l4.2 5.6L17.5 3zm-1.1 16.1h1.7L7.7 4.8H5.9l10.5 14.3z"/></svg>
+          </a>
+          <a href="#" aria-label="LinkedIn" class="hud grid h-11 w-11 place-items-center border border-neon/20 bg-neon/5 text-steel hover:text-neon hover:bg-neon/15 transition-colors">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 11-.02 5 2.5 2.5 0 01.02-5zM3 9h4v12H3zM10 9h3.8v1.7h.05c.53-.95 1.83-1.95 3.75-1.95C21.4 8.75 22 11 22 14.1V21h-4v-6.1c0-1.45-.03-3.3-2.05-3.3-2.06 0-2.37 1.57-2.37 3.2V21h-4z"/></svg>
+          </a>
+          <a href="#" aria-label="YouTube" class="hud grid h-11 w-11 place-items-center border border-neon/20 bg-neon/5 text-steel hover:text-neon hover:bg-neon/15 transition-colors">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23 12s0-3.4-.43-5.03a2.9 2.9 0 00-2.04-2.06C18.9 4.5 12 4.5 12 4.5s-6.9 0-8.53.41A2.9 2.9 0 001.43 6.97C1 8.6 1 12 1 12s0 3.4.43 5.03a2.9 2.9 0 002.04 2.06C5.1 19.5 12 19.5 12 19.5s6.9 0 8.53-.41a2.9 2.9 0 002.04-2.06C23 15.4 23 12 23 12zM9.75 15.02V8.98L15.5 12z"/></svg>
+          </a>
+          <a href="#" aria-label="Discord" class="hud grid h-11 w-11 place-items-center border border-neon/20 bg-neon/5 text-steel hover:text-neon hover:bg-neon/15 transition-colors">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.3 5.4A16.7 16.7 0 0015.2 4l-.3.6c1.4.4 2.6 1 3.7 1.7a13.6 13.6 0 00-11.2 0c1-.7 2.3-1.3 3.7-1.7L10.8 4a16.7 16.7 0 00-4.1 1.4C4 9.3 3.3 13.1 3.6 16.8A16.9 16.9 0 008.7 20l1-1.5c-.9-.3-1.7-.7-2.4-1.2l.6-.4a11.9 11.9 0 0010.2 0l.6.4c-.8.5-1.6.9-2.4 1.2l1 1.5a16.9 16.9 0 005.1-3.2c.4-4.3-.7-8-2.8-11.4zM9.5 14.7c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2zm5 0c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2z"/></svg>
+          </a>
+        </div>
+        <p class="mt-6 font-display text-[10px] tracking-[.22em] text-ash">
+          UPLINK: <a href="mailto:cyborg@techfest.org" class="text-neon hover:text-hot transition-colors">cyborg@techfest.org</a>
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-12 flex flex-col gap-3 border-t border-neon/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
+      <p class="font-display text-[9px] sm:text-[10px] tracking-[.22em] text-ash">
+        © <span id="year">2025</span> TECHFEST, IIT BOMBAY — ALL SYSTEMS RESERVED.
+      </p>
+      <p class="font-display text-[9px] sm:text-[10px] tracking-[.22em] text-neon/60 flicker">
+        DESIGNED IN THE VOID // POWAI SECTOR 7
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- ===================== REGISTRATION MODAL ===================== -->
+<div id="modal" class="fixed inset-0 z-[120] hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div id="modalBackdrop" class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+
+  <div id="modalPanel" class="hud glass relative w-full max-w-lg max-h-[92vh] overflow-y-auto p-6 sm:p-8 modal-enter">
+    <button id="modalClose" type="button" aria-label="Close registration dialog"
+      class="absolute right-4 top-4 grid h-9 w-9 place-items-center border border-hot/30 text-hot hover:bg-hot/15 transition-colors">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg>
+    </button>
+
+    <p class="font-display text-[9px] tracking-[.34em] text-hot">// SECURE ENROLMENT CHANNEL</p>
+    <h3 id="modalTitle" class="mt-2 font-display text-xl sm:text-2xl font-black uppercase text-steel">
+      INITIALIZE <span class="grad-text">REGISTRATION</span>
+    </h3>
+    <p class="mt-2 text-sm text-ash">Fill the operator manifest to generate your CYBORG access ID.</p>
+
+    <form id="regForm" novalidate class="mt-7 space-y-5">
+      <div>
+        <label for="fName" class="block font-display text-[10px] tracking-[.24em] text-neon mb-2">OPERATOR NAME *</label>
+        <input id="fName" name="name" type="text" autocomplete="name" placeholder="e.g. Aarav Mehta"
+          class="input-cyber w-full px-4 py-3 text-sm placeholder:text-ash/50" />
+        <p class="err-msg mt-1.5 hidden font-display text-[10px] tracking-wider text-hot"></p>
+      </div>
+
+      <div>
+        <label for="fCollege" class="block font-display text-[10px] tracking-[.24em] text-neon mb-2">INSTITUTION / COLLEGE *</label>
+        <input id="fCollege" name="college" type="text" autocomplete="organization" placeholder="e.g. IIT Bombay"
+          class="input-cyber w-full px-4 py-3 text-sm placeholder:text-ash/50" />
+        <p class="err-msg mt-1.5 hidden font-display text-[10px] tracking-wider text-hot"></p>
+      </div>
+
+      <div>
+        <label for="fEmail" class="block font-display text-[10px] tracking-[.24em] text-neon mb-2">NEURAL MAIL ID *</label>
+        <input id="fEmail" name="email" type="email" autocomplete="email" placeholder="operator@domain.com"
+          class="input-cyber w-full px-4 py-3 text-sm placeholder:text-ash/50" />
+        <p class="err-msg mt-1.5 hidden font-display text-[10px] tracking-wider text-hot"></p>
+      </div>
+
+      <div>
+        <label for="fTrack" class="block font-display text-[10px] tracking-[.24em] text-neon mb-2">PREFERRED ARENA</label>
+        <select id="fTrack" name="track" class="input-cyber w-full px-4 py-3 text-sm">
+          <option value="Robowars">ROBOWARS — Combat</option>
+          <option value="Meltdown">MELTDOWN — Terrain</option>
+          <option value="Cortex Hack">CORTEX HACK — Neural</option>
+          <option value="Full Throttle">FULL THROTTLE — Speed</option>
+          <option value="Iron Frame">IRON FRAME — Exoskeleton</option>
+          <option value="Singularity Expo">SINGULARITY EXPO — Showcase</option>
+        </select>
+      </div>
+
+      <button type="submit" class="w-full btn-clip btn-primary px-8 py-4 font-display text-xs tracking-[.22em]">
+        TRANSMIT DATA →
+      </button>
+
+      <p class="text-center font-display text-[9px] tracking-[.2em] text-ash">
+        ENCRYPTED VIA AES-512-Q // NO DATA LEAVES THIS DEVICE
+      </p>
+    </form>
+
+    <!-- Success state -->
+    <div id="regSuccess" class="hidden text-center py-6">
+      <div class="mx-auto grid h-16 w-16 place-items-center rounded-full border-2 border-neon text-neon pulse-ring">
+        <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h4 class="mt-6 font-display text-lg font-black tracking-widest text-neon text-glow">REGISTRATION CONFIRMED</h4>
+      <p class="mt-3 text-sm text-ash">Welcome to the grid, <span id="successName" class="text-steel font-semibold">Operator</span>.</p>
+      <p class="mt-5 font-display text-[10px] tracking-[.24em] text-ash">OPERATOR ID</p>
+      <p id="successId" class="font-display text-xl font-bold text-hot text-glow-hot">CX-000000</p>
+      <button type="button" id="successClose" class="mt-8 btn-clip btn-ghost px-8 py-3.5 font-display text-[11px] tracking-[.22em]">
+        CLOSE CHANNEL
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== JAVASCRIPT ===================== -->
+<script>
+(function () {
+  'use strict';
+
+  const $  = (s, c = document) => c.querySelector(s);
+  const $$ = (s, c = document) => Array.from(c.querySelectorAll(s));
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ============================================================
+     1. BOOT SPLASH
+  ============================================================ */
+  (function boot() {
+    const overlay = $('#boot'), bar = $('#bootBar'), pct = $('#bootPct');
+    let p = 0;
+    const tick = setInterval(() => {
+      p = Math.min(100, p + Math.random() * 18 + 6);
+      bar.style.width = p + '%';
+      pct.textContent = Math.floor(p) + '%';
+      if (p >= 100) {
+        clearInterval(tick);
+        setTimeout(() => { overlay.classList.add('done'); document.body.style.overflow = ''; }, 260);
+      }
+    }, reduceMotion ? 40 : 130);
+    // Hard failsafe
+    setTimeout(() => { overlay.classList.add('done'); document.body.style.overflow = ''; }, 3500);
+  })();
+
+  /* ============================================================
+     2. NAVBAR : scroll state, mobile toggle, active link
+  ============================================================ */
+  const navShell = $('#navShell'), navToggle = $('#navToggle'), mobileMenu = $('#mobileMenu');
+  const bar1 = $('[data-bar="1"]'), bar2 = $('[data-bar="2"]'), bar3 = $('[data-bar="3"]');
+  const scrollBar = $('#scrollBar');
+
+  function closeMenu() {
+    mobileMenu.style.maxHeight = '0px';
+    navToggle.setAttribute('aria-expanded', 'false');
+    bar1.style.transform = ''; bar3.style.transform = ''; bar2.style.opacity = '1';
+  }
+  function openMenu() {
+    mobileMenu.style.maxHeight = mobileMenu.scrollHeight + 'px';
+    navToggle.setAttribute('aria-expanded', 'true');
+    bar1.style.transform = 'translateY(7px) rotate(45deg)';
+    bar3.style.transform = 'translateY(-7px) rotate(-45deg)';
+    bar2.style.opacity = '0';
+  }
+  navToggle.addEventListener('click', () => {
+    navToggle.getAttribute('aria-expanded') === 'true' ? closeMenu() : openMenu();
+  });
+  $$('.mob-link').forEach(a => a.addEventListener('click', closeMenu));
+  window.addEventListener('resize', () => { if (window.innerWidth >= 1024) closeMenu(); });
+
+  let ticking = false;
+  function onScroll() {
+    const y = window.scrollY;
+    if (y > 24) {
+      navShell.classList.add('shadow-[0_10px_40px_-12px_rgba(0,243,255,.25)]');
+      navShell.style.borderColor = 'rgba(0,243,255,.4)';
+      navShell.style.background = 'rgba(6,7,12,.82)';
+    } else {
+      navShell.classList.remove('shadow-[0_10px_40px_-12px_rgba(0,243,255,.25)]');
+      navShell.style.borderColor = '';
+      navShell.style.background = '';
+    }
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    scrollBar.style.width = (h > 0 ? (y / h) * 100 : 0) + '%';
+    ticking = false;
+  }
+  window.addEventListener('scroll', () => {
+    if (!ticking) { window.requestAnimationFrame(onScroll); ticking = true; }
+  }, { passive: true });
+  onScroll();
+
+  // Active nav link via IntersectionObserver
+  const navLinks = $$('.nav-link');
+  const sections = ['home', 'augmentations', 'events', 'terminal'].map(id => document.getElementById(id)).filter(Boolean);
+  if ('IntersectionObserver' in window) {
+    const spy = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + e.target.id));
+        }
+      });
+    }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+    sections.forEach(s => spy.observe(s));
+  }
+
+  /* ============================================================
+     3. SCROLL REVEAL
+  ============================================================ */
+  const revealEls = $$('.reveal');
+  if ('IntersectionObserver' in window && !reduceMotion) {
+    const ro = new IntersectionObserver((entries, obs) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('is-visible'); obs.unobserve(e.target); }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+    revealEls.forEach(el => ro.observe(el));
+  } else {
+    revealEls.forEach(el => el.classList.add('is-visible'));
+  }
+
+  /* ============================================================
+     4. CURSOR GLOW
+  ============================================================ */
+  const glow = $('#cursorGlow');
+  if (window.matchMedia('(pointer:fine)').matches) {
+    let gx = window.innerWidth / 2, gy = window.innerHeight / 2, cx = gx, cy = gy;
+    window.addEventListener('mousemove', e => { gx = e.clientX; gy = e.clientY; }, { passive: true });
+    (function loop() {
+      cx += (gx - cx) * 0.12; cy += (gy - cy) * 0.12;
+      glow.style.transform = 'translate3d(' + cx + 'px,' + cy + 'px,0)';
+      requestAnimationFrame(loop);
+    })();
+  }
+
+  /* ============================================================
+     5. ANIMATED COUNTERS + STAT BARS + GAUGE
+  ============================================================ */
+  function animateCounter(el) {
+    const target   = parseFloat(el.dataset.target || '0');
+    const decimals = parseInt(el.dataset.decimals || '0', 10);
+    const suffix   = el.dataset.suffix || '';
+    const dur = 1800; const start = performance.now();
+    function step(now) {
+      const t = Math.min(1, (now - start) / dur);
+      const eased = 1 - Math.pow(1 - t, 3);
+      el.textContent = (target * eased).toFixed(decimals) + suffix;
+      if (t < 1) requestAnimationFrame(step); else el.textContent = target.toFixed(decimals) + suffix;
+    }
+    requestAnimationFrame(step);
+  }
+
+  const counters = $$('.counter');
+  if ('IntersectionObserver' in window) {
+    const co = new IntersectionObserver((entries, obs) => {
+      entries.forEach(e => { if (e.isIntersecting) { animateCounter(e.target); obs.unobserve(e.target); } });
+    }, { threshold: 0.5 });
+    counters.forEach(c => co.observe(c));
+  } else { counters.forEach(animateCounter); }
+
+  // Stat bars + gauge (fire once hero card in view)
+  const gauge = $('#gauge'), gaugeVal = $('#gaugeVal');
+  function fillHud() {
+    $$('.statbar').forEach(b => { b.style.width = (b.dataset.w || 0) + '%'; });
+    let g = 0; const target = 98;
+    const gi = setInterval(() => {
+      g = Math.min(target, g + 2);
+      gauge.style.setProperty('--p', g);
+      gaugeVal.textContent = g;
+      if (g >= target) clearInterval(gi);
+    }, 22);
+  }
+  if ('IntersectionObserver' in window) {
+    const ho = new IntersectionObserver((entries, obs) => {
+      entries.forEach(e => { if (e.isIntersecting) { fillHud(); obs.disconnect(); } });
+    }, { threshold: 0.35 });
+    ho.observe(gauge);
+  } else { fillHud(); }
+
+  // Core temp jitter
+  const tempVal = $('#tempVal');
+  setInterval(() => { tempVal.textContent = (36.1 + Math.random() * 0.9).toFixed(1); }, 2200);
+
+  /* ============================================================
+     6. EEG WAVEFORM BARS
+  ============================================================ */
+  const wave = $('#wave');
+  const BARS = 34;
+  for (let i = 0; i < BARS; i++) {
+    const b = document.createElement('span');
+    b.className = 'flex-1 bg-gradient-to-t from-neon/25 to-neon rounded-t-sm';
+    b.style.height = '10%';
+    b.style.transition = 'height .28s ease';
+    wave.appendChild(b);
+  }
+  const waveBars = Array.from(wave.children);
+  if (!reduceMotion) {
+    let phase = 0;
+    setInterval(() => {
+      phase += 0.42;
+      waveBars.forEach((b, i) => {
+        const v = Math.abs(Math.sin(phase + i * 0.38)) * 72 + Math.random() * 24 + 8;
+        b.style.height = Math.min(100, v) + '%';
+      });
+    }, 240);
+  }
+
+  /* ============================================================
+     7. TERMINAL — typewriter boot + live telemetry
+  ============================================================ */
+  const out = $('#terminalOut');
+  const rebootBtn = $('#rebootBtn');
+  let typeTimer = null, telemetryTimer = null, runToken = 0;
+
+  const BOOT = [
+    { t: '[ 0.0001 ] CYBORG BIOS v9.4.1 — TECHFEST // IIT BOMBAY', c: 'ash' },
+    { t: '[ 0.0143 ] Verifying quantum signature .................. OK', c: 'ok' },
+    { t: '[ 0.0489 ] Mounting /dev/cortex0 ....................... OK', c: 'ok' },
+    { t: '[ 0.0912 ] Loading neural driver bci-512.ko ............ OK', c: 'ok' },
+    { t: '[ 0.1377 ] Calibrating exoskeletal servos [16/16] ...... OK', c: 'ok' },
+    { t: '[ 0.2044 ] Optic nerve handshake // multispectral ...... OK', c: 'ok' },
+    { t: '[ 0.2571 ] WARN: dermal sensor 04 latency 12ms > 8ms', c: 'warn' },
+    { t: '[ 0.3110 ] Re-routing bus through backup lattice ....... OK', c: 'ok' },
+    { t: '[ 0.4002 ] Spinning up QPU // 128 qubits @ 0.4 mK ...... OK', c: 'ok' },
+    { t: '[ 0.5388 ] Syncing with TECHFEST mainframe (Powai) ..... OK', c: 'ok' },
+    { t: '[ 0.6120 ] Encryption layer AES-512-Q engaged .......... OK', c: 'ok' },
+    { t: '[ 0.7455 ] Neural sync rate ....................... 100 Hz', c: 'cy' },
+    { t: '[ 0.8901 ] Augmentation units ....................... 99.8%', c: 'cy' },
+    { t: '', c: 'ash' },
+    { t: '>> ALL SUBSYSTEMS NOMINAL. OPERATOR CLEARED FOR ARENA.', c: 'hot' },
+    { t: '>> Streaming live telemetry ...', c: 'ash' }
+  ];
+
+  const TELEMETRY = [
+    'heartbeat: 62 bpm  | o2: 99% | cortisol: nominal',
+    'bci packet 0x' + '' + 'A4F2 decoded → intent: GRIP',
+    'exo torque draw 612 Nm / 847 Nm ceiling',
+    'qpu job #%ID% complete in 0.0004 s',
+    'vision pipeline: 118 fps | objects tracked: %N%',
+    'thermal envelope stable @ 36.%D% °C',
+    'mesh uplink: powai-node-07 | ping 3 ms',
+    'arena queue: %N% operators awaiting sync',
+    'firmware delta patched — build cx29.%N%',
+    'kinetic harvest +%N% mWh recovered'
+  ];
+
+  const COLORS = {
+    ok:   'text-neon/85',
+    warn: 'text-yellow-400/90',
+    hot:  'text-hot font-semibold',
+    cy:   'text-cyan-200',
+    ash:  'text-ash'
+  };
+
+  function appendLine(cls) {
+    const p = document.createElement('p');
+    p.className = 'whitespace-pre-wrap break-words ' + (COLORS[cls] || COLORS.ok);
+    out.appendChild(p);
+    return p;
+  }
+
+  function typeLine(text, cls, token, done) {
+    const node = appendLine(cls);
+    if (reduceMotion) { node.textContent = text; out.scrollTop = out.scrollHeight; done(); return; }
+    let i = 0;
+    (function step() {
+      if (token !== runToken) return;
+      node.textContent = text.slice(0, ++i);
+      out.scrollTop = out.scrollHeight;
+      if (i < text.length) typeTimer = setTimeout(step, 12);
+      else done();
+    })();
+  }
+
+  function randTelemetry() {
+    let s = TELEMETRY[Math.floor(Math.random() * TELEMETRY.length)];
+    s = s.replace('%ID%', Math.floor(1000 + Math.random() * 8999))
+         .replace(/%N%/g, Math.floor(10 + Math.random() * 90))
+         .replace('%D%', Math.floor(Math.random() * 9));
+    const stamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
+    return '[' + stamp + '] ' + s;
+  }
+
+  function startTelemetry(token) {
+    telemetryTimer = setInterval(() => {
+      if (token !== runToken) { clearInterval(telemetryTimer); return; }
+      const node = appendLine(Math.random() > 0.86 ? 'warn' : 'ok');
+      node.textContent = randTelemetry();
+      while (out.children.length > 60) out.removeChild(out.firstChild);
+      out.scrollTop = out.scrollHeight;
+    }, 1900);
+  }
+
+  function runBoot() {
+    runToken++;
+    const token = runToken;
+    clearTimeout(typeTimer); clearInterval(telemetryTimer);
+    out.innerHTML = '';
+    let idx = 0;
+    (function next() {
+      if (token !== runToken) return;
+      if (idx >= BOOT.length) { startTelemetry(token); return; }
+      const line = BOOT[idx++];
+      typeLine(line.t, line.c, token, () => { typeTimer = setTimeout(next, 130); });
+    })();
+  }
+
+  // Start terminal only when scrolled into view (perf)
+  let termStarted = false;
+  function ensureTerminal() { if (!termStarted) { termStarted = true; runBoot(); } }
+  if ('IntersectionObserver' in window) {
+    const to = new IntersectionObserver((entries, obs) => {
+      entries.forEach(e => { if (e.isIntersecting) { ensureTerminal(); obs.disconnect(); } });
+    }, { threshold: 0.2 });
+    to.observe(out);
+  } else { ensureTerminal(); }
+  rebootBtn.addEventListener('click', () => { termStarted = true; runBoot(); });
+
+  // Uptime clock
+  const uptimeEl = $('#uptime');
+  const bootAt = Date.now();
+  setInterval(() => {
+    const s = Math.floor((Date.now() - bootAt) / 1000);
+    const pad = n => String(n).padStart(2, '0');
+    uptimeEl.textContent = pad(Math.floor(s / 3600)) + ':' + pad(Math.floor(s / 60) % 60) + ':' + pad(s % 60);
+  }, 1000);
+
+  /* ============================================================
+     8. COUNTDOWN TIMER (Techfest — 19 Dec, 09:00 IST)
+  ============================================================ */
+  function nextTarget() {
+    const now = new Date();
+    let y = now.getFullYear();
+    // 19 Dec 09:00 IST == 03:30 UTC
+    let t = new Date(Date.UTC(y, 11, 19, 3, 30, 0));
+    if (t.getTime() - now.getTime() < 0) t = new Date(Date.UTC(y + 1, 11, 19, 3, 30, 0));
+    return t;
+  }
+  const TARGET = nextTarget();
+  const cdD = $('#cd-days'), cdH = $('#cd-hours'), cdM = $('#cd-mins'), cdS = $('#cd-secs');
+  const pad2 = n => String(n).padStart(2, '0');
+
+  $('#eventDate').textContent = 'December 19–21, ' + TARGET.getUTCFullYear();
+  $('#year').textContent = new Date().getFullYear();
+
+  function tickCountdown() {
+    let diff = TARGET.getTime() - Date.now();
+    if (diff <= 0) {
+      cdD.textContent = '00'; cdH.textContent = '00'; cdM.textContent = '00'; cdS.textContent = '00';
+      return;
+    }
+    const s = Math.floor(diff / 1000);
+    cdD.textContent = pad2(Math.floor(s / 86400));
+    cdH.textContent = pad2(Math.floor(s / 3600) % 24);
+    cdM.textContent = pad2(Math.floor(s / 60) % 60);
+    cdS.textContent = pad2(s % 60);
+  }
+  tickCountdown();
+  setInterval(tickCountdown, 1000);
+
+  /* ============================================================
+     9. REGISTRATION MODAL + VALIDATION
+  ============================================================ */
+  const modal = $('#modal'), modalPanel = $('#modalPanel');
+  const form = $('#regForm'), success = $('#regSuccess');
+  let lastFocused = null;
+
+  function openModal() {
+    lastFocused = document.activeElement;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+    modalPanel.classList.remove('modal-enter'); void modalPanel.offsetWidth; modalPanel.classList.add('modal-enter');
+    setTimeout(() => { const f = $('#fName'); if (f && !form.classList.contains('hidden')) f.focus(); }, 120);
+  }
+  function closeModal() {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.body.style.overflow = '';
+    if (lastFocused) lastFocused.focus();
+  }
+  $$('[data-modal-open]').forEach(b => b.addEventListener('click', openModal));
+  $('#modalClose').addEventListener('click', closeModal);
+  $('#modalBackdrop').addEventListener('click', closeModal);
+  $('#successClose').addEventListener('click', () => {
+    closeModal();
+    setTimeout(() => { success.classList.add('hidden'); form.classList.remove('hidden'); form.reset(); }, 320);
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+    // Focus trap
+    if (e.key === 'Tab' && !modal.classList.contains('hidden')) {
+      const f = $$('button, input, select, a[href]', modalPanel).filter(el => el.offsetParent !== null);
+      if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+
+  function setError(input, msg) {
+    const box = input.parentElement.querySelector('.err-msg');
+    if (msg) { input.classList.add('err'); box.textContent = '⚠ ' + msg; box.classList.remove('hidden'); }
+    else { input.classList.remove('err'); box.textContent = ''; box.classList.add('hidden'); }
+    return !msg;
+  }
+
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+
+  function validate() {
+    const n = $('#fName'), c = $('#fCollege'), e = $('#fEmail');
+    let ok = true;
+    ok = setError(n, n.value.trim().length < 3 ? 'Operator name must be at least 3 characters.' : (/^[a-zA-Z\s.'-]+$/.test(n.value.trim()) ? '' : 'Letters, spaces and . \' - only.')) && ok;
+    ok = setError(c, c.value.trim().length < 2 ? 'Institution name is required.' : '') && ok;
+    ok = setError(e, !EMAIL_RE.test(e.value.trim()) ? 'Enter a valid neural mail ID.' : '') && ok;
+    return ok;
+  }
+
+  ['fName', 'fCollege', 'fEmail'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('input', () => { if (el.classList.contains('err')) validate(); });
+  });
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    if (!validate()) {
+      const bad = $('.input-cyber.err', form);
+      if (bad) bad.focus();
+      return;
+    }
+    const btn = $('button[type="submit"]', form);
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'TRANSMITTING...';
+    setTimeout(() => {
+      btn.disabled = false; btn.textContent = original;
+      const first = $('#fName').value.trim().split(/\s+/)[0];
+      $('#successName').textContent = first.charAt(0).toUpperCase() + first.slice(1);
+      $('#successId').textContent = 'CX-' + String(Math.floor(100000 + Math.random() * 899999));
+      form.classList.add('hidden');
+      success.classList.remove('hidden');
+      modalPanel.classList.remove('modal-enter'); void modalPanel.offsetWidth; modalPanel.classList.add('modal-enter');
+      $('#successClose').focus();
+    }, 900);
+  });
+
+  /* ============================================================
+     10. SMOOTH ANCHOR SCROLL WITH NAV OFFSET
+  ============================================================ */
+  $$('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', ev => {
+      const id = a.getAttribute('href');
+      if (!id || id === '#') return;
+      const el = document.querySelector(id);
+      if (!el) return;
+      ev.preventDefault();
+      const top = el.getBoundingClientRect().top + window.scrollY - 92;
+      window.scrollTo({ top: top, behavior: reduceMotion ? 'auto' : 'smooth' });
+    });
+  });
+
+})();
+</script>
+</body>
+</html>
